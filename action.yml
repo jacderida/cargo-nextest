@@ -36,6 +36,9 @@ inputs:
     description: Used to run ignored tests when that is desirable.
     required: false
     default: false
+  rust-log:
+    description: set the value for the `RUST_LOG` environment variable
+    required: false
   test-run-name:
     description: >
       The name to use for the test run, e.g. unit-test-ubuntu-latest. This will be the name of the
@@ -67,11 +70,14 @@ runs:
         RELEASE: ${{ inputs.release }}
         RETRIES: ${{ inputs.retries }}
         RUN_IGNORED: ${{ inputs.run-ignored }}
+        RUST_LOG: ${{ inputs.rust-log }}
         TEST_BIN: ${{ inputs.bin }}
         TEST_PROFILE: ${{ inputs.profile }}
         TEST_THREADS: ${{ inputs.test-threads }}
       run: |
-        command="cargo nextest run"
+        command=""
+        if [[ -n "$RUST_LOG" ]]; then command="RUST_LOG=$RUST_LOG "; fi
+        command="${command}cargo nextest run"
         command="${command} --profile $TEST_PROFILE"
         if [[ "$RELEASE" == "true" ]]; then command="${command} --release"; fi
         if [[ "$RUN_IGNORED" == "true" ]]; then command="${command} --run-ignored ignored-only"; fi
